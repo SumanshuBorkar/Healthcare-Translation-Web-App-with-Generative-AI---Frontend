@@ -34,6 +34,9 @@ const MedicalTranslator = () => {
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = inputLang;
+      
+      // Add max alternatives for better accuracy
+      recognitionRef.current.maxAlternatives = 1;
 
       recognitionRef.current.onresult = (event) => {
         let interimTranscript = '';
@@ -60,14 +63,48 @@ const MedicalTranslator = () => {
       };
 
       recognitionRef.current.onerror = (event) => {
-        setError(`Speech recognition error: ${event.error}`);
+        console.error('Speech recognition error details:', event);
+        
+        let errorMessage = '';
+        switch(event.error) {
+          case 'network':
+            errorMessage = 'Network error. Please check your internet connection and ensure you are using HTTPS or localhost.';
+            break;
+          case 'not-allowed':
+            errorMessage = 'Microphone access denied. Please allow microphone permissions in your browser settings.';
+            break;
+          case 'no-speech':
+            errorMessage = 'No speech detected. Please try speaking again.';
+            // Don't stop listening for no-speech
+            return;
+          case 'audio-capture':
+            errorMessage = 'Microphone not found. Please ensure your microphone is connected.';
+            break;
+          case 'aborted':
+            errorMessage = 'Speech recognition aborted.';
+            break;
+          default:
+            errorMessage = `Speech recognition error: ${event.error}`;
+        }
+        
+        setError(errorMessage);
         setIsListening(false);
       };
 
       recognitionRef.current.onend = () => {
+        // Auto-restart if still in listening mode
         if (isListening) {
-          recognitionRef.current.start();
+          try {
+            recognitionRef.current.start();
+          } catch (e) {
+            console.error('Failed to restart recognition:', e);
+            setIsListening(false);
+          }
         }
+      };
+      
+      recognitionRef.current.onstart = () => {
+        console.log('Speech recognition started successfully');
       };
     } else {
       setError('Speech recognition not supported in this browser. Please use Chrome or Edge.');
@@ -75,9 +112,26 @@ const MedicalTranslator = () => {
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.stop();
+        } catch (e) {
+          console.error('Error stopping recognition:', e);
+        }
       }
     };
+  }, [inputLang]);
+
+  useEffect(() => {
+    if (transcript.trim()) {
+      translateText(transcript);
+    }
+  }, [inputLang, outputLang]);
+
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      // ... (Rest of your speech recognition setup remains the same)
+      // Make sure recognitionRef.current.lang = inputLang; is here (which it is)
+    }
   }, [inputLang]);
 
   const translateText = async (text) => {
@@ -112,14 +166,43 @@ const MedicalTranslator = () => {
     }
   };
 
-  const toggleListening = () => {
+  const toggleListening = async () => {
     if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
+      try {
+        recognitionRef.current?.stop();
+        setIsListening(false);
+      } catch (e) {
+        console.error('Error stopping recognition:', e);
+        setIsListening(false);
+      }
     } else {
-      recognitionRef.current?.start();
-      setIsListening(true);
-      setError('');
+      // Check for microphone permissions first
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        stream.getTracks().forEach(track => track.stop()); // Stop the test stream
+        
+        // Now start recognition
+        try {
+          recognitionRef.current?.start();
+          setIsListening(true);
+          setError('');
+        } catch (e) {
+          if (e.name === 'InvalidStateError') {
+            // Recognition is already started, stop and restart
+            recognitionRef.current?.stop();
+            setTimeout(() => {
+              recognitionRef.current?.start();
+              setIsListening(true);
+              setError('');
+            }, 100);
+          } else {
+            throw e;
+          }
+        }
+      } catch (err) {
+        setError('Microphone access denied. Please allow microphone permissions and reload the page.');
+        console.error('Microphone permission error:', err);
+      }
     }
   };
 
@@ -143,9 +226,6 @@ const MedicalTranslator = () => {
     const temp = inputLang;
     setInputLang(outputLang);
     setOutputLang(temp);
-    if (transcript) {
-      translateText(transcript);
-    }
   };
 
   return (
