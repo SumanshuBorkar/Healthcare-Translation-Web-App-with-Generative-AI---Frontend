@@ -16,43 +16,9 @@
 
 ### System Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Client Browser                        │
-│  ┌───────────────────────────────────────────────────┐  │
-│  │           React Frontend (Port 5173)              │  │
-│  │  ┌─────────────┐  ┌──────────────┐              │  │
-│  │  │ Web Speech  │  │  React       │              │  │
-│  │  │ API         │  │  Components  │              │  │
-│  │  └─────────────┘  └──────────────┘              │  │
-│  └───────────────────────────────────────────────────┘  │
-└────────────────────┬────────────────────────────────────┘
-                     │ HTTP/HTTPS
-                     │ (CORS Enabled)
-┌────────────────────▼────────────────────────────────────┐
-│              Express.js Backend (Port 5000)             │
-│  ┌────────────┐  ┌──────────────┐  ┌───────────────┐  │
-│  │   CORS     │  │  Rate        │  │   Helmet      │  │
-│  │ Middleware │  │  Limiting    │  │   Security    │  │
-│  └────────────┘  └──────────────┘  └───────────────┘  │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │            Translation Engine                     │  │
-│  │  ┌────────────────────────────────────────────┐  │  │
-│  │  │         Groq SDK Integration              │  │  │
-│  │  │  (llama-3.3-70b-versatile model)         │  │  │
-│  │  └────────────────────────────────────────────┘  │  │
-│  └──────────────────────────────────────────────────┘  │
-└────────────────────┬────────────────────────────────────┘
-                     │ HTTPS API Calls
-                     │
-┌────────────────────▼────────────────────────────────────┐
-│              Groq AI Cloud Platform                      │
-│  ┌──────────────────────────────────────────────────┐  │
-│  │    LLaMA 3.3 70B Language Model                  │  │
-│  │    (Medical Translation Optimized)               │  │
-│  └──────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="https://uml.planttext.com/plantuml/svg/TLJ1Rjim3BqRy3yGFGm9K2SPYg503aFJj5kpfKiGfzjb5rKc4g6AfSeoslxzI5jsRMyxXPOUdnx9nrmLNZXVddGSUUKrmXqAxOzIE8Iz4tcXXLScXr_u20jh8O4KdqlC9SAD4WSdJd4KHq9wu-2XG1T7blYKL5Ra7iwMMY7zNZlpGfTd88ec7W1tI1pmnPdSOvxzpaTRupny-dXvCQwoglj13cjABQ8ymcAxgc3rvm1t-seT5lIoa4zTyjbiLfE7Yw7spIw5UvLb6b-e7HMIpuRAXKTOgvFoeK0-663kK9_GK-jawPH_gs3rsG3ORVbjVb1v_MmT3h1VdNc6zEPxXU0FYly5MQnWgKt9TQ_Nudu15vCBk9nTZzl4nOg7oEE3v7Cp89XpDyKJJEbvgWts-4focri2rZERmzg831vMy06MmlgIdBFARUcPiuOGDinf7eB4cuJvO6Gi5olqE8u29kbGL_sGJZrY5jxlS8Qn4MoxIVSm5LPDVMWWKhMU4iwXCAMJk1RvuHp8wmVq78-PgI4WhchOS_WfjCfue1kdgEKmudF2LjT9xys5rkO5im5FvOOvB8yed-3T6gIQupx3ZZUfyFzX2fwPyzhfjzOxlA0PkYAE0g3F6Mu9xWTyjOUuMSv8NeUkruAKE0eemWT7SJ52Qv17uIVIdAn6pYWcqY6LDABcDCYGH7uZ7VlzDkMrRAZ_SX_B2_2azroZgnrvoz-jujvag8cyi2G6tuNtkj4liIXrloaTetrBDpzQDlPEAu8rZ5lNzVPZHooy64F1xOuG-g66tgZ2Ql7MKN55oTN_xXy0" alt="Logo" width="100%"/>
+</p>
 
 ### Technology Stack
 
