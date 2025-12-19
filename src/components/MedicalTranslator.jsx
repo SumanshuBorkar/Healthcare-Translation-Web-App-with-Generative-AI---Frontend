@@ -35,7 +35,6 @@ const MedicalTranslator = () => {
       recognitionRef.current.interimResults = true;
       recognitionRef.current.lang = inputLang;
       
-      // Add max alternatives for better accuracy
       recognitionRef.current.maxAlternatives = 1;
 
       recognitionRef.current.onresult = (event) => {
@@ -75,7 +74,6 @@ const MedicalTranslator = () => {
             break;
           case 'no-speech':
             errorMessage = 'No speech detected. Please try speaking again.';
-            // Don't stop listening for no-speech
             return;
           case 'audio-capture':
             errorMessage = 'Microphone not found. Please ensure your microphone is connected.';
@@ -92,7 +90,6 @@ const MedicalTranslator = () => {
       };
 
       recognitionRef.current.onend = () => {
-        // Auto-restart if still in listening mode
         if (isListening) {
           try {
             recognitionRef.current.start();
@@ -129,8 +126,6 @@ const MedicalTranslator = () => {
 
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      // ... (Rest of your speech recognition setup remains the same)
-      // Make sure recognitionRef.current.lang = inputLang; is here (which it is)
     }
   }, [inputLang]);
 
@@ -141,7 +136,7 @@ const MedicalTranslator = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/translate', {
+      const response = await fetch('https://healthcare-translation-web-app-with-6282.onrender.com/api/translate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -176,19 +171,16 @@ const MedicalTranslator = () => {
         setIsListening(false);
       }
     } else {
-      // Check for microphone permissions first
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         stream.getTracks().forEach(track => track.stop()); // Stop the test stream
         
-        // Now start recognition
         try {
           recognitionRef.current?.start();
           setIsListening(true);
           setError('');
         } catch (e) {
           if (e.name === 'InvalidStateError') {
-            // Recognition is already started, stop and restart
             recognitionRef.current?.stop();
             setTimeout(() => {
               recognitionRef.current?.start();
@@ -251,7 +243,6 @@ const MedicalTranslator = () => {
             </button>
           </div>
 
-          {/* Language Selection */}
           {showSettings && (
             <div className="space-y-4 pt-4 border-t border-gray-200">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -322,7 +313,6 @@ const MedicalTranslator = () => {
             </div>
           </div>
 
-          {/* Translated Transcript */}
           <div className="bg-white rounded-2xl shadow-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-800">Translation</h2>
@@ -346,7 +336,6 @@ const MedicalTranslator = () => {
           </div>
         </div>
 
-        {/* Control Buttons */}
         <div className="bg-white rounded-2xl shadow-xl p-6">
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
@@ -394,7 +383,6 @@ const MedicalTranslator = () => {
             </button>
           </div>
 
-          {/* Status Indicator */}
           <div className="mt-4 text-center">
             {isListening && (
               <div className="flex items-center justify-center space-x-2">
@@ -405,7 +393,6 @@ const MedicalTranslator = () => {
           </div>
         </div>
 
-        {/* Privacy Notice */}
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-4">
           <p className="text-sm text-blue-800">
             🔒 <strong>Privacy Notice:</strong> Your conversations are processed securely and not stored permanently. 
